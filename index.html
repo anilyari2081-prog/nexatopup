@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f97316">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NexaTopUp">
+<link rel="manifest" id="pwaManifest">
+<title>NexaTopUp - Free Fire Diamond Top Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #f97316;
+    --orange-dark: #ea580c;
+    --orange-light: #fed7aa;
+    --bg: #fff7ed;
+    --dark: #1c1917;
+    --card: #ffffff;
+    --text: #292524;
+    --muted: #78716c;
+    --border: #e7e5e4;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  
+  /* NAVBAR */
+  .navbar {
+    background: var(--orange);
+    padding: 0 1rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .logo { font-family: 'Bebas Neue', cursive; font-size: 1.8rem; color: white; text-shadow: 2px 2px 0 #c2410c; letter-spacing: 1px; }
+  .logo span { color: #fed7aa; }
+  .nav-right { display: flex; align-items: center; gap: 0.5rem; }
+  .btn-login { background: white; color: var(--orange); border: none; padding: 0.4rem 1.2rem; border-radius: 20px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+  .wallet-badge { background: white; color: var(--orange); padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 4px; }
+  .avatar { width: 36px; height: 36px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.9rem; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 100;
+  }
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 0 0.45rem;
+    cursor: pointer;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: var(--muted);
+    border: none;
+    background: none;
+    gap: 3px;
+    transition: color 0.18s;
+    position: relative;
+  }
+  .bottom-nav-item.active { color: var(--orange); }
+  .bottom-nav-item.active .nav-icon-wrap {
+    background: var(--orange);
+    border-radius: 14px;
+  }
+  .bottom-nav-item.active .nav-icon-wrap svg {
+    stroke: white;
+  }
+  .nav-icon-wrap {
+    width: 50px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    border-radius: 14px;
+  }
+  .bottom-nav-item svg { width: 21px; height: 21px; }
+
+  /* PAGES */
+  .page { display: none; padding-bottom: 80px; }
+  .page.active { display: block; }
+
+  /* NOTICE BANNER */
+  .notice {
+    background: #1c1917;
+    color: white;
+    padding: 0.35rem 1rem;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .notice strong { color: var(--orange-light); }
+  .notice-close { position: absolute; right: 0.8rem; top: 0.8rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.1rem; }
+
+  /* IMAGE SLIDER */
+  .hero-slider {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/7;
+    overflow: hidden;
+    background: #1c1917;
+  }
+  .hero-slider-track {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+  .hero-slide {
+    width: 33.333%;
+    height: 100%;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-slide-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
+  }
+  .hero-slide-text {
+    position: absolute;
+    bottom: 0.8rem;
+    left: 1rem;
+    right: 1rem;
+    color: white;
+  }
+  .hero-slide-text h2 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    line-height: 1.1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .hero-slide-text p {
+    font-size: 0.72rem;
+    opacity: 0.9;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .slider-dots {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.8rem;
+    display: flex;
+    gap: 5px;
+  }
+  .slider-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .slider-dot.active {
+    background: white;
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  /* HERO BANNER */
+  .hero-banner {
+    background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-banner::before { content: ''; position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+  .hero-banner h1 { font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 2px; margin-bottom: 0.3rem; }
+  .hero-banner p { font-size: 0.8rem; opacity: 0.9; }
+  .hero-dots { display: flex; justify-content: center; gap: 4px; margin-top: 0.8rem; }
+  .hero-dots span { width: 24px; height: 4px; background: rgba(255,255,255,0.4); border-radius: 2px; }
+  .hero-dots span.active { background: white; }
+
+  /* SOCIAL PILLS */
+  .social-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.55rem;
+    padding: 0.8rem 0.8rem;
+  }
+  .social-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 0.85rem 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .social-pill:active { transform: scale(0.95); }
+  .social-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-green { background: #25d366; }
+  .dot-blue { background: #229ed9; }
+  .dot-play { background: #34a853; }
+
+  /* SECTION TITLE */
+  .section-title { padding: 0.8rem 1rem 0.4rem; font-family: 'Bebas Neue', cursive; font-size: 1.4rem; letter-spacing: 1px; color: var(--dark); }
+
+  /* PRODUCT GRID */
+  .product-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; padding: 0 0.8rem 0.5rem; }
+  .product-card {
+    background: var(--orange);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s;
+  }
+  .product-card:active { transform: scale(0.97); }
+  .product-card-img {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, var(--orange-dark), #9a3412);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    position: relative;
+  }
+  .product-badge {
+    position: absolute;
+    top: 4px; left: 4px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 0.55rem;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .product-card-name { padding: 4px 6px 6px; color: white; font-size: 0.7rem; font-weight: 700; text-align: center; }
+  .product-card.auto { background: #7c3aed; }
+  .product-card.auto .product-card-img { background: linear-gradient(135deg, #7c3aed, #4c1d95); }
+
+  /* LATEST ORDERS */
+  .orders-preview { padding: 0 0.8rem; }
+  .orders-header { text-align: center; margin-bottom: 0.5rem; }
+  .orders-header h2 { font-family: 'Bebas Neue', cursive; font-size: 1.5rem; color: var(--dark); }
+  .orders-header p { font-size: 0.8rem; color: var(--muted); }
+  .orders-header p span { color: var(--orange); font-weight: 800; }
+  .order-item {
+    background: white;
+    border-radius: 12px;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .order-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1rem; color: white; flex-shrink: 0;
+  }
+  .order-info { flex: 1; }
+  .order-info strong { font-size: 0.85rem; display: block; }
+  .order-info span { font-size: 0.75rem; color: var(--muted); }
+  .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+  .status-processing { background: #fef3c7; color: #92400e; }
+  .status-completed { background: #dcfce7; color: #166534; }
+  .status-pending { background: #fee2e2; color: #991b1b; }
+
+  /* FOLLOW US */
+  .follow-section { background: white; margin: 0.5rem 0.8rem; border-radius: 12px; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .follow-section h2 { font-family: 'Bebas Neue', cursive; font-size: 1.5rem; text-align: center; margin-bottom: 0.8rem; }
+  .follow-item { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 0.8rem; border: 2px solid var(--border); border-radius: 14px; margin-bottom: 0.6rem; cursor: pointer; font-size: 0.84rem; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  .follow-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+
+  /* PRODUCT DETAIL PAGE */
+  .product-detail { padding: 1rem; }
+  .product-hero { background: linear-gradient(135deg, var(--orange), #c2410c); border-radius: 16px; padding: 1.5rem; text-align: center; color: white; margin-bottom: 1rem; }
+  .product-hero h2 { font-family: 'Bebas Neue', cursive; font-size: 1.8rem; letter-spacing: 1px; }
+  .product-hero .emoji { font-size: 3rem; margin-bottom: 0.5rem; }
+  .packages-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .package-card {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .package-card.selected { border-color: var(--orange); background: #fff7ed; }
+  .package-card.sold-out { opacity: 0.6; cursor: not-allowed; }
+  .pkg-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #ccc; flex-shrink: 0; transition: all 0.15s; }
+  .package-card.selected .pkg-radio { border-color: var(--orange); background: var(--orange); box-shadow: inset 0 0 0 3px white; }
+  .pkg-info { flex: 1; }
+  .package-card .qty { font-weight: 900; font-size: 0.82rem; color: #1c1917; line-height: 1.2; }
+  .package-card .label { font-size: 0.7rem; color: var(--muted); }
+  .package-card .price { font-weight: 900; font-size: 0.88rem; color: var(--orange); white-space: nowrap; }
+  .soldout-badge { font-size: 0.58rem; background: #dc2626; color: white; padding: 1px 5px; border-radius: 4px; font-weight: 800; display: block; margin-top: 2px; }
+  .order-form { background: white; border-radius: 12px; padding: 1rem; margin-top: 0.8rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .form-group { margin-bottom: 0.8rem; }
+  .form-group label { display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 0.6rem 0.8rem;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'Nunito', sans-serif; font-size: 0.9rem;
+    background: var(--bg); outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--orange); }
+  .btn-order {
+    width: 100%; background: var(--orange); color: white;
+    border: none; padding: 0.9rem; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-order:hover { background: var(--orange-dark); }
+
+  /* ADD FUND PAGE */
+  .add-fund { padding: 1rem; }
+  .payment-method-card {
+    background: white; border: 2px solid var(--border);
+    border-radius: 14px; padding: 1rem 1.2rem;
+    display: flex; align-items: center; gap: 0.8rem;
+    cursor: pointer; margin-bottom: 0.6rem;
+    transition: border-color 0.15s;
+  }
+  .payment-method-card:hover { border-color: var(--orange); }
+  .payment-icon { width: 44px; height: 44px; background: #1c1917; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+  .payment-info strong { display: block; font-size: 0.9rem; }
+  .payment-info span { font-size: 0.75rem; color: var(--muted); }
+  .payment-arrow { margin-left: auto; color: var(--orange); font-size: 1.2rem; }
+  .verification-note { text-align: center; font-size: 0.75rem; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 0.5rem; }
+
+  /* MANUAL PAYMENT */
+  .manual-pay { padding: 1rem; }
+  .qr-box { background: white; border-radius: 14px; padding: 1.2rem; text-align: center; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .qr-placeholder { width: 160px; height: 160px; background: #1c1917; margin: 0 auto 0.8rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; }
+  .pay-tabs { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; }
+  .pay-tab { padding: 0.4rem 1.2rem; border-radius: 20px; border: 2px solid var(--border); cursor: pointer; font-weight: 700; font-size: 0.85rem; background: none; }
+  .pay-tab.active { background: var(--orange); color: white; border-color: var(--orange); }
+  .remark-box { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.6rem 0.8rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
+  .remark-code { font-family: monospace; font-weight: 700; font-size: 1rem; }
+  .btn-copy { background: var(--orange); color: white; border: none; border-radius: 6px; padding: 0.3rem 0.7rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+  .upload-box { border: 2px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; color: var(--muted); cursor: pointer; font-size: 0.85rem; margin-bottom: 0.6rem; }
+  .deposit-history { background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .deposit-history h3 { font-weight: 800; margin-bottom: 0.6rem; font-size: 0.9rem; }
+  .deposit-table { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
+  .deposit-table th { text-align: left; padding: 0.4rem 0; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+  .deposit-table td { padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .approved-badge { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 0.7rem; }
+  .pending-badge { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 0.7rem; }
+
+  /* MY ORDERS */
+  .orders-page { padding: 1rem; }
+  .order-card { background: white; border-radius: 12px; padding: 0.9rem; margin-bottom: 0.6rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .order-card-row { display: flex; justify-content: space-between; margin-bottom: 0.25rem; font-size: 0.83rem; }
+  .order-card-row .label { color: var(--muted); font-weight: 600; }
+  .order-card-row .value { font-weight: 700; }
+
+  /* MY CODES */
+  .codes-page { padding: 1rem; }
+  .codes-header { display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .codes-header h2 { font-weight: 800; }
+  .btn-redeem { background: var(--orange); color: white; border: none; border-radius: 8px; padding: 0.4rem 0.9rem; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+  .no-codes { text-align: center; padding: 2rem; color: var(--muted); }
+  .no-codes h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+  .btn-order-now { background: #dc2626; color: white; border: none; border-radius: 8px; padding: 0.5rem 1.2rem; font-weight: 700; cursor: pointer; }
+
+  /* ACCOUNT */
+  .account-page { padding: 1rem; }
+  .account-header { text-align: center; margin-bottom: 1rem; }
+  .account-avatar { width: 72px; height: 72px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; font-weight: 800; margin: 0 auto 0.5rem; }
+  .account-name { font-weight: 800; font-size: 1.1rem; }
+  .account-balance { font-size: 0.85rem; color: var(--muted); }
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.4rem; margin-bottom: 1rem; }
+  .stat-card { background: white; border-radius: 10px; padding: 0.6rem 0.3rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .stat-card .val { font-weight: 800; font-size: 0.9rem; color: var(--orange); }
+  .stat-card .lbl { font-size: 0.6rem; color: var(--muted); }
+  .info-section { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 0.6rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .info-section h3 { font-weight: 800; font-size: 0.85rem; margin-bottom: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.3rem 0; }
+  .verified-badge { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; }
+  .balance-box { background: var(--orange); color: white; border-radius: 10px; padding: 0.5rem 1rem; font-weight: 800; display: inline-block; }
+
+  /* AUTH PAGES */
+  .auth-page { padding: 1.5rem 1rem; }
+  .auth-card { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .auth-card h2 { font-family: 'Bebas Neue', cursive; font-size: 2rem; margin-bottom: 0.2rem; }
+  .auth-card p { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.2rem; }
+  .auth-divider { text-align: center; font-size: 0.75rem; color: var(--muted); margin: 0.8rem 0; text-transform: uppercase; letter-spacing: 1px; }
+  .btn-google { width: 100%; background: var(--orange); color: white; border: none; padding: 0.8rem; border-radius: 10px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  .auth-footer { text-align: center; margin-top: 1rem; font-size: 0.83rem; color: var(--muted); }
+  .auth-footer a { color: var(--orange); font-weight: 700; cursor: pointer; }
+  .forgot { color: var(--orange); font-weight: 700; font-size: 0.83rem; cursor: pointer; text-align: center; display: block; margin: 0.5rem 0; }
+
+  /* CONTACT */
+  .contact-page { padding: 1rem; }
+
+  /* FOOTER */
+  .footer { background: var(--orange); color: white; padding: 0.8rem 0.7rem 0.6rem; margin-top: 1rem; }
+  .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+  .footer h3 { font-family: 'Bebas Neue', cursive; font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 0.35rem; }
+  .footer p { font-size: 0.65rem; opacity: 0.9; line-height: 1.4; font-weight: 700; }
+  .footer-social { display: flex; gap: 0.4rem; margin-top: 0.4rem; }
+  .footer-social a { width: 26px; height: 26px; background: rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; text-decoration: none; color: white; }
+  .support-card { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 0.4rem 0.6rem; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; font-weight: 800; cursor: pointer; }
+  .footer-copy { text-align: center; font-size: 0.62rem; opacity: 0.7; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 0.4rem; font-weight: 700; }
+
+  /* NEED HELP FLOAT */
+  .help-float { position: fixed; bottom: 80px; right: 12px; z-index: 99; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .help-label { background: #dc2626; color: white; padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+  .help-btn { width: 48px; height: 48px; background: var(--orange); border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 1.3rem; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: white; border-radius: 16px; padding: 1.5rem; width: 90%; max-width: 360px; }
+  .modal h3 { font-family: 'Bebas Neue', cursive; font-size: 1.4rem; margin-bottom: 0.3rem; }
+  .modal p { font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem; }
+  .modal-buttons { display: flex; gap: 0.5rem; }
+  .btn-cancel { flex: 1; background: var(--bg); border: 1px solid var(--border); padding: 0.6rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
+  .btn-confirm { flex: 1; background: var(--orange); color: white; border: none; padding: 0.6rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
+
+  /* TOAST */
+  .toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: #1c1917; color: white; padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.82rem; font-weight: 700; z-index: 300; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+</style>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "AIzaSyDfjAeCZZact2u1GOC51un_1xhwUi1GpCw",
+      authDomain: "nexatopup-55ab0.firebaseapp.com",
+      projectId: "nexatopup-55ab0",
+      storageBucket: "nexatopup-55ab0.firebasestorage.app",
+      messagingSenderId: "852095517649",
+      appId: "1:852095517649:web:dfb637b1c54c264ef456f0"
+    });
+  }
+
+  var _auth = firebase.auth();
+  var _db   = firebase.firestore();
+  var _gp   = new firebase.auth.GoogleAuthProvider();
+  var _lastForgotEmail = "";
+
+  // Toast notification
+  function fbToast(msg, type) {
+    var t = document.getElementById("toast");
+    if (!t) { console.warn("Toast not found"); return; }
+    var icons = { success: "\u2705", error: "\u274c", info: "\u2139\ufe0f" };
+    var bgs   = {
+      success: "linear-gradient(135deg,#14532d,#16a34a)",
+      error:   "linear-gradient(135deg,#7f1d1d,#dc2626)",
+      info:    "linear-gradient(135deg,#1c1917,#44403c)"
+    };
+    var borders = { success: "#4ade80", error: "#fca5a5", info: "#f97316" };
+    t.innerHTML    = (icons[type] || "\u2139\ufe0f") + " " + msg;
+    t.style.background   = bgs[type]   || bgs.info;
+    t.style.borderLeft   = "4px solid " + (borders[type] || borders.info);
+    t.style.fontSize     = "0.95rem";
+    t.style.fontWeight   = "700";
+    t.style.padding      = "1rem 1.2rem";
+    t.style.whiteSpace   = "normal";
+    t.style.maxWidth     = "85vw";
+    t.classList.add("show");
+    setTimeout(function () { t.classList.remove("show"); }, 4000);
+  }
+
+  // Update UI when logged in
+  function fbSetLoggedIn(user, wallet) {
+    window.isLoggedIn = true;
+    var initial = (user.displayName || user.email || "U")[0].toUpperCase();
+    var nr = document.getElementById("navRight");
+    if (nr) {
+      var badge = document.createElement("div");
+      badge.className = "wallet-badge";
+      badge.textContent = "\ud83d\udcb3 " + wallet + " Rs";
+      var av = document.createElement("div");
+      av.className = "avatar";
+      av.textContent = initial;
+      nr.innerHTML = "";
+      nr.appendChild(badge);
+      nr.appendChild(av);
+    }
+    var no = document.getElementById("bottom-nav-out");
+    var ni = document.getElementById("bottom-nav-in");
+    if (no) no.style.display = "none";
+    if (ni) ni.style.display = "flex";
+    var ne = document.getElementById("acc-name");
+    var ee = document.getElementById("acc-email");
+    if (ne) ne.textContent = user.displayName || user.email;
+    if (ee) ee.textContent = user.email;
+  }
+
+  // Update UI when logged out
+  function fbSetLoggedOut() {
+    window.isLoggedIn = false;
+    var nr = document.getElementById("navRight");
+    if (nr) {
+      var btn = document.createElement("button");
+      btn.className = "btn-login";
+      btn.textContent = "Login";
+      btn.onclick = function () { showPage("login"); };
+      nr.innerHTML = "";
+      nr.appendChild(btn);
+    }
+    var no = document.getElementById("bottom-nav-out");
+    var ni = document.getElementById("bottom-nav-in");
+    if (no) no.style.display = "flex";
+    if (ni) ni.style.display = "none";
+  }
+
+  // Watch auth state
+  _auth.onAuthStateChanged(function (user) {
+    if (user) {
+      _db.collection("users").doc(user.uid).get().then(function (s) {
+        fbSetLoggedIn(user, s.exists ? (s.data().wallet || 0) : 0);
+      }).catch(function () {
+        fbSetLoggedIn(user, 0);
+      });
+    } else {
+      fbSetLoggedOut();
+    }
+  });
+
+  // LOGIN
+  window.doLogin = function () {
+    var e = document.getElementById("login-email").value.trim();
+    var p = document.getElementById("login-pass").value;
+    if (!e || !p) { fbToast("Email ra password haluhos!", "error"); return; }
+    _auth.signInWithEmailAndPassword(e, p)
+      .then(function () {
+        fbToast("Login successful! Welcome back!", "success");
+        showPage("home");
+      })
+      .catch(function (err) {
+        console.error("Login error:", err.code, err.message);
+        var msgs = {
+          "auth/invalid-credential": "Email va password milena!",
+          "auth/wrong-password":     "Email va password milena!",
+          "auth/user-not-found":     "Yo email registered xaina!",
+          "auth/too-many-requests":  "Dherai palta try bhayo! Kei ber pachi try gara.",
+          "auth/invalid-email":      "Valid email halnos!"
+        };
+        fbToast(msgs[err.code] || err.message, "error");
+      });
+  };
+
+  // REGISTER
+  window.doRegister = function () {
+    var n  = document.getElementById("reg-name").value.trim();
+    var e  = document.getElementById("reg-email").value.trim();
+    var p  = document.getElementById("reg-pass").value;
+    var p2 = document.getElementById("reg-pass2").value;
+    if (!n || !e || !p) { fbToast("Sabai fields bharnus!", "error"); return; }
+    if (p !== p2)        { fbToast("Passwords match bhayena!", "error"); return; }
+    if (p.length < 6)    { fbToast("Password 6+ characters hunu parcha!", "error"); return; }
+
+    var btn = document.getElementById("reg-submit-btn");
+    if (btn) { btn.disabled = true; btn.textContent = "Creating..."; }
+
+    _auth.createUserWithEmailAndPassword(e, p)
+      .then(function (cred) {
+        var user = cred.user;
+        return user.updateProfile({ displayName: n }).then(function () {
+          return _db.collection("users").doc(user.uid).set({
+            name: n, email: e, wallet: 0, createdAt: new Date().toISOString()
+          });
+        });
+      })
+      .then(function () {
+        fbToast("Account banayo! Welcome to NexaTopUp!", "success");
+        showPage("home");
+      })
+      .catch(function (err) {
+        console.error("Register error:", err.code, err.message);
+        if (btn) { btn.disabled = false; btn.textContent = "Register"; }
+        var msgs = {
+          "auth/email-already-in-use": "Yo email registered xa! Login gara.",
+          "auth/invalid-email":        "Valid email halnos!",
+          "auth/weak-password":        "Password 6+ characters hunu parcha!"
+        };
+        fbToast(msgs[err.code] || err.message, "error");
+      });
+  };
+
+  // GOOGLE LOGIN
+  window.doGoogleLogin = function () {
+    _auth.signInWithPopup(_gp)
+      .then(function (result) {
+        var user = result.user;
+        return _db.collection("users").doc(user.uid).get().then(function (s) {
+          if (!s.exists) {
+            return _db.collection("users").doc(user.uid).set({
+              name: user.displayName, email: user.email, wallet: 0,
+              createdAt: new Date().toISOString()
+            });
+          }
+        });
+      })
+      .then(function () {
+        fbToast("Google login successful!", "success");
+        showPage("home");
+      })
+      .catch(function (err) {
+        console.error("Google login error:", err.code, err.message);
+        fbToast("Google login hudena: " + err.message, "error");
+      });
+  };
+
+  // LOGOUT
+  window.logout = function () {
+    _auth.signOut().then(function () {
+      fbToast("Logout bhayo!", "success");
+      showPage("home");
+    });
+  };
+
+  // FORGOT PASSWORD - Step 1
+  window.doForgotStep1 = function () {
+    var e = document.getElementById("forgot-email").value.trim();
+    if (!e) { fbToast("Email haluhos!", "error"); return; }
+    var btn = document.getElementById("forgot-btn1");
+    if (btn) { btn.disabled = true; btn.textContent = "Sending..."; }
+
+    // First check if email exists by trying fetchSignInMethodsForEmail
+    _auth.fetchSignInMethodsForEmail(e)
+      .then(function (methods) {
+        if (!methods || methods.length === 0) {
+          // Email not registered
+          if (btn) { btn.disabled = false; btn.textContent = "Proceed"; }
+          fbToast("Yo email registered xaina! Pahile register gara.", "error");
+          return;
+        }
+        // Email exists, send reset email
+        return _auth.sendPasswordResetEmail(e).then(function () {
+          _lastForgotEmail = e;
+          document.getElementById("forgot-sent-email").textContent = e;
+          document.getElementById("forgot-step1").style.display = "none";
+          document.getElementById("forgot-step2").style.display = "block";
+        });
+      })
+      .catch(function (err) {
+        console.error("Forgot password error:", err.code, err.message);
+        if (btn) { btn.disabled = false; btn.textContent = "Proceed"; }
+        var msgs = {
+          "auth/invalid-email":     "Valid email halnos!",
+          "auth/too-many-requests": "Dherai palta try bhayo! Kei ber pachi gara."
+        };
+        fbToast(msgs[err.code] || err.message, "error");
+      });
+  };
+
+  // RESEND reset email
+  window.doResendEmail = function () {
+    if (!_lastForgotEmail) { fbToast("Email haluhos!", "error"); return; }
+    _auth.sendPasswordResetEmail(_lastForgotEmail)
+      .then(function () { fbToast("Email pheri pathaiyo!", "success"); })
+      .catch(function () { fbToast("Pathauna sakena, pheri try gara.", "error"); });
+  };
+</script>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo">Nexa<span>TopUp</span></div>
+  <div class="nav-right" id="navRight">
+    <button class="btn-login" onclick="showPage('login')">Login</button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- HELP FLOAT -->
+<div class="help-float">
+  <div id="helpPopup" style="display:none;flex-direction:column;align-items:flex-end;gap:8px;margin-bottom:8px">
+    <!-- WhatsApp -->
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="background:white;border-radius:8px;padding:4px 10px;font-size:0.75rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.15);white-space:nowrap">WhatsApp</div>
+      <a href="https://wa.me/9779746925872" target="_blank" style="width:46px;height:46px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.2);text-decoration:none">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M17.5 14.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.7-.3-1.4-.7-1.9-1.3-.5-.5-.9-1.1-1-1.8-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.3.2-.4 0-.2-.5-1.3-.7-1.8-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.5.5-.8 1.1-.8 1.8 0 1.1.7 2.2 1.5 3 .2.2 2 3.1 4.9 4.2.5.2.9.3 1.2.4.5.1 1 .1 1.3 0 .4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3zM12 2a10 10 0 00-8.6 15L2 22l5.1-1.3A10 10 0 1012 2z"/></svg>
+      </a>
+    </div>
+    <!-- Messenger -->
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="background:white;border-radius:8px;padding:4px 10px;font-size:0.75rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.15);white-space:nowrap">Messenger</div>
+      <a href="https://www.facebook.com/anilyari3" target="_blank" style="width:46px;height:46px;background:linear-gradient(135deg,#0084ff,#a334fa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.2);text-decoration:none">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M12 2C6.5 2 2 6.2 2 11.4c0 2.8 1.2 5.3 3.2 7.1v3.5l3.3-1.8c.9.2 1.8.3 2.5.3 5.5 0 10-4.2 10-9.4C22 6.2 17.5 2 12 2zm1 12.7l-2.6-2.7-5 2.7 5.5-5.8 2.6 2.7 5-2.7-5.5 5.8z"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="help-label" onclick="toggleHelpPopup()" style="cursor:pointer">Need help?</div>
+  <button class="help-btn" onclick="toggleHelpPopup()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1A19.5 19.5 0 013.1 9.7 19.8 19.8 0 01.1 1.1 2 2 0 012 0h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L6.1 7.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7A2 2 0 0122 14.9z"/></svg></button>
+</div>
+
+<!-- ===== PAGE: HOME ===== -->
+<div class="page active" id="page-home">
+  <div class="notice" id="notice">
+    <strong>Notice:</strong> You can top up on our website 24/7! For any issues, contact our WhatsApp support for quick assistance [8AM - 10PM]! 🇳🇵 Special discounts every Friday.
+  </div>
+
+  <div class="hero-slider" id="heroSlider">
+    <div class="hero-slider-track" id="sliderTrack">
+      <!-- Slide 1: Free Fire Diamonds -->
+      <div class="hero-slide">
+        <svg viewBox="0 0 400 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+          <defs>
+            <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f97316"/>
+              <stop offset="100%" stop-color="#7c2d12"/>
+            </linearGradient>
+            <radialGradient id="glow1" cx="70%" cy="40%" r="50%">
+              <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+          </defs>
+          <rect width="400" height="175" fill="url(#bg1)"/>
+          <rect width="400" height="175" fill="url(#glow1)"/>
+          <!-- decorative circles -->
+          <circle cx="340" cy="30" r="70" fill="rgba(255,255,255,0.06)"/>
+          <circle cx="360" cy="80" r="40" fill="rgba(255,255,255,0.05)"/>
+          <circle cx="60" cy="150" r="50" fill="rgba(0,0,0,0.1)"/>
+          <!-- big diamond -->
+          <g transform="translate(270,30)">
+            <polygon points="60,0 110,40 60,110 10,40" fill="rgba(255,255,255,0.92)" stroke="rgba(200,240,255,0.4)" stroke-width="1"/>
+            <polygon points="60,0 35,40 60,110 85,40" fill="rgba(200,230,255,0.3)"/>
+            <polygon points="10,40 110,40" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
+          </g>
+          <!-- small diamonds -->
+          <g transform="translate(355,15) scale(0.35)">
+            <polygon points="30,0 55,20 30,55 5,20" fill="rgba(255,255,255,0.5)"/>
+          </g>
+          <g transform="translate(240,120) scale(0.25)">
+            <polygon points="30,0 55,20 30,55 5,20" fill="rgba(255,255,255,0.4)"/>
+          </g>
+          <!-- text -->
+          <text x="20" y="65" font-family="'Bebas Neue',Arial Black,sans-serif" font-size="32" fill="white" letter-spacing="2" style="text-shadow:0 2px 8px rgba(0,0,0,0.4)">FREE FIRE</text>
+          <text x="20" y="100" font-family="'Bebas Neue',Arial Black,sans-serif" font-size="32" fill="#fbbf24" letter-spacing="2">DIAMONDS</text>
+          <text x="20" y="125" font-family="Arial,sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">Top up instantly — Best rates in Nepal</text>
+          <!-- badge -->
+          <rect x="20" y="138" width="100" height="22" rx="11" fill="rgba(0,0,0,0.3)"/>
+          <text x="70" y="153" font-family="Arial,sans-serif" font-size="10" fill="white" text-anchor="middle" font-weight="bold">FROM Rs 85</text>
+        </svg>
+      </div>
+      <!-- Slide 2: Weekly Pass -->
+      <div class="hero-slide">
+        <svg viewBox="0 0 400 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+          <defs>
+            <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#1e1b4b"/>
+            </linearGradient>
+            <radialGradient id="glow2" cx="70%" cy="50%" r="45%">
+              <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+          </defs>
+          <rect width="400" height="175" fill="url(#bg2)"/>
+          <rect width="400" height="175" fill="url(#glow2)"/>
+          <circle cx="320" cy="40" r="80" fill="rgba(255,255,255,0.05)"/>
+          <circle cx="350" cy="130" r="45" fill="rgba(255,255,255,0.04)"/>
+          <!-- ticket graphic -->
+          <g transform="translate(240,25)">
+            <rect x="0" y="10" width="140" height="90" rx="10" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+            <!-- notches -->
+            <circle cx="0" cy="55" r="10" fill="#1e1b4b"/>
+            <circle cx="140" cy="55" r="10" fill="#1e1b4b"/>
+            <!-- dashed line -->
+            <line x1="15" y1="55" x2="125" y2="55" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="4,4"/>
+            <!-- stars -->
+            <text x="70" y="42" text-anchor="middle" font-size="18" fill="#fbbf24">★★★</text>
+            <text x="70" y="78" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="11" fill="white" font-weight="bold">WEEKLY PASS</text>
+            <text x="70" y="92" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="rgba(255,255,255,0.7)">MEMBERSHIP</text>
+          </g>
+          <text x="20" y="65" font-family="'Bebas Neue',Arial Black,sans-serif" font-size="30" fill="white" letter-spacing="2">WEEKLY</text>
+          <text x="20" y="98" font-family="'Bebas Neue',Arial Black,sans-serif" font-size="30" fill="#a78bfa" letter-spacing="2">MEMBERSHIP</text>
+          <text x="20" y="122" font-family="Arial,sans-serif" font-size="11" fill="rgba(255,255,255,0.8)">Exclusive rewards every week</text>
+          <rect x="20" y="135" width="90" height="22" rx="11" fill="rgba(167,139,250,0.3)"/>
+          <text x="65" y="150" font-family="Arial,sans-serif" font-size="10" fill="white" text-anchor="middle" font-weight="bold">Rs 200 ONLY</text>
+        </svg>
+      </div>
+      <!-- Slide 3: Special Friday Offer -->
+      <div class="hero-slide">
+        <svg viewBox="0 0 400 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+          <defs>
+            <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0f172a"/>
+              <stop offset="100%" stop-color="#1e3a5f"/>
+            </linearGradient>
+            <radialGradient id="glow3" cx="75%" cy="45%" r="50%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+          </defs>
+          <rect width="400" height="175" fill="url(#bg3)"/>
+          <rect width="400" height="175" fill="url(#glow3)"/>
+          <!-- grid lines -->
+          <line x1="0" y1="35" x2="400" y2="35" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <line x1="0" y1="70" x2="400" y2="70" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <line x1="0" y1="105" x2="400" y2="105" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <line x1="0" y1="140" x2="400" y2="140" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <!-- lightning bolt -->
+          <g transform="translate(270, 10)">
+            <polygon points="50,0 25,65 45,65 20,130 80,50 55,50 80,0" fill="#fbbf24" opacity="0.9"/>
+            <polygon points="50,0 25,65 45,65 20,130 80,50 55,50 80,0" fill="url(#glow3)" opacity="0.3"/>
+          </g>
+          <!-- circle glow behind bolt -->
+          <circle cx="320" cy="75" r="65" fill="rgba(251,191,36,0.08)"/>
+          <!-- text -->
+          <text x="20" y="55" font-family="'Bebas Neue',Arial Black,sans-serif" font-size="22" fill="rgba(255,255,255,0.6)" letter-spacing="3">EVERY FRIDAY</text>
+          <text x="18" y="95" font-family="'Bebas Neue',Arial Black,sans-serif" font-size="38" fill="#fbbf24" letter-spacing="1">SPECIAL</text>
+          <text x="18" y="130" font-family="'Bebas Neue',Arial Black,sans-serif" font-size="38" fill="white" letter-spacing="1">DISCOUNTS!</text>
+          <text x="20" y="155" font-family="Arial,sans-serif" font-size="11" fill="rgba(255,255,255,0.7)">Nepal's #1 Free Fire Top Up Store</text>
+        </svg>
+      </div>
+    </div>
+    <!-- dots -->
+    <div class="slider-dots" id="sliderDots">
+      <div class="slider-dot active" onclick="goToSlide(0)"></div>
+      <div class="slider-dot" onclick="goToSlide(1)"></div>
+      <div class="slider-dot" onclick="goToSlide(2)"></div>
+    </div>
+  </div>
+
+  <div class="social-row">
+    <div class="social-pill" onclick="window.open('https://wa.me/9779746925872','_blank')">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><circle cx="12" cy="12" r="12" fill="#25D366"/><path d="M17.5 14.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.7-.3-1.4-.7-1.9-1.3-.5-.5-.9-1.1-1-1.8-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.3.2-.4 0-.2-.5-1.3-.7-1.8-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.5.5-.8 1.1-.8 1.8 0 1.1.7 2.2 1.5 3 .2.2 2 3.1 4.9 4.2.5.2.9.3 1.2.4.5.1 1 .1 1.3 0 .4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3z" fill="white"/></svg>
+      WhatsApp
+    </div>
+    <div class="social-pill" onclick="window.open('https://www.facebook.com/anilyari3','_blank')">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path d="M15.5 8h-2c-.6 0-1 .4-1 1v1.5h3l-.4 2.5H12.5V20h-2.5v-7H8v-2.5h2V9c0-2.2 1.3-3.5 3.5-3.5.7 0 2 .1 2 .1V8z" fill="white"/></svg>
+      Facebook
+    </div>
+    <div class="social-pill" onclick="showInstallPopup()">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.6 1.1L13.5 11 3.6 20.9c-.4-.2-.6-.6-.6-1.1V2.2c0-.5.2-.9.6-1.1z" fill="#EA4335"/><path d="M17.1 7.5l2.4 1.4c.7.4.7 1.1 0 1.5L17.1 12l-3.6-3.5 3.6-1z" fill="#FBBC04"/><path d="M3.6 1.1l9.9 9.9-3.6 3.5L3.6 1.1z" fill="#4285F4"/><path d="M3.6 20.9l6.3-13.4 3.6 3.5-9.9 9.9z" fill="#34A853"/></svg>
+      Google Play
+    </div>
+  </div>
+
+  <div class="section-title"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" style="vertical-align:middle;margin-right:6px"><rect x="2" y="7" width="20" height="10" rx="5" fill="#1c1917"/><circle cx="7" cy="12" r="1.5" fill="white"/><path d="M16 10v4M14 12h4" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="11" cy="9.5" r="0.8" fill="#f97316"/><circle cx="13" cy="14.5" r="0.8" fill="#f97316"/></svg> FF TOPUP</div>
+  <div class="product-grid">
+    <div class="product-card" onclick="showProductDetail('ff')">
+      <div class="product-card-img"><span class="product-badge">Manual Delivery</span><svg viewBox="0 0 24 24" width="44" height="44" fill="none"><path d="M12 3L2 9l10 12L22 9z" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/><path d="M2 9h20M12 3L7 9l5 12 5-12z" stroke="rgba(150,220,255,0.6)" stroke-width="0.8"/></svg></div>
+      <div class="product-card-name">Free Fire</div>
+    </div>
+    <div class="product-card" onclick="showProductDetail('weekly')">
+      <div class="product-card-img"><span class="product-badge">Manual Delivery</span><svg viewBox="0 0 24 24" width="44" height="44" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" fill="rgba(255,255,255,0.9)"/><circle cx="6" cy="12" r="2" fill="#f97316"/><path d="M10 9h8M10 12h6M10 15h4" stroke="#999" stroke-width="1" stroke-linecap="round"/><path d="M6 6v2M6 16v2" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg></div>
+      <div class="product-card-name">Weekly</div>
+    </div>
+    <div class="product-card" onclick="showProductDetail('weekly-lite')">
+      <div class="product-card-img"><span class="product-badge">Manual Delivery</span><svg viewBox="0 0 24 24" width="44" height="44" fill="none"><rect x="3" y="8" width="18" height="13" rx="2" fill="rgba(255,255,255,0.9)"/><path d="M3 11h18" stroke="#f97316" stroke-width="1.5"/><path d="M9 8V5h6v3" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.7)" stroke-width="1"/><path d="M9 14h6" stroke="#aaa" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div class="product-card-name">Weekly Lite</div>
+    </div>
+    <div class="product-card" onclick="showProductDetail('levelup')">
+      <div class="product-card-img"><span class="product-badge">Manual Delivery</span><svg viewBox="0 0 24 24" width="44" height="44" fill="none"><path d="M12 4l-7 9h4v7h6v-7h4z" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/></svg></div>
+      <div class="product-card-name">Level u</div>
+    </div>
+    <div class="product-card" onclick="showProductDetail('evo')">
+      <div class="product-card-img"><span class="product-badge">Manual Delivery</span><svg viewBox="0 0 24 24" width="44" height="44" fill="none"><path d="M12 3L22 20H2z" fill="rgba(255,255,255,0.95)"/><path d="M12 8L17.5 18H6.5z" fill="#f97316" opacity="0.5"/></svg></div>
+      <div class="product-card-name">Evo access</div>
+    </div>
+    <div class="product-card" onclick="showProductDetail('airdrop')">
+      <div class="product-card-img"><span class="product-badge">Manual Delivery</span><svg viewBox="0 0 24 24" width="44" height="44" fill="none"><circle cx="12" cy="10" r="6" stroke="rgba(255,255,255,0.9)" stroke-width="1.5" fill="none"/><circle cx="12" cy="10" r="3" fill="rgba(255,255,255,0.8)"/><path d="M12 16v5M9 21h6" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round"/><path d="M6 10A6 6 0 0112 4" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-linecap="round"/></svg></div>
+      <div class="product-card-name">Airdrop</div>
+    </div>
+    <div class="product-card auto" onclick="showProductDetail('unipin')">
+      <div class="product-card-img"><span class="product-badge">Auto Delivery</span><svg viewBox="0 0 24 24" width="44" height="44" fill="none"><path d="M12 2L4 6v6c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V6z" fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/><path d="M9 12l2 2 4-4" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="product-card-name">Unipin</div>
+    </div>
+  </div>
+
+  <!-- LATEST ORDERS -->
+  <div style="padding: 0.8rem 0.8rem 0.4rem;">
+    <div class="orders-header">
+      <h2>Latest Orders</h2>
+      <p>The latest <span>6 orders</span> at a glance</p>
+    </div>
+    <div id="ordersWrap" style="opacity:1;transition:opacity 0.5s ease">
+      <div class="orders-preview" id="ordersPreview"></div>
+    </div>
+  </div>
+
+  <!-- FOLLOW US -->
+  <div class="follow-section">
+    <h2>Follow Us</h2>
+    <div class="follow-item" style="background:linear-gradient(135deg,#1c1917 0%,#064e1e 100%);border-color:transparent;color:white;cursor:pointer" onclick="window.open('https://wa.me/9779746925872','_blank')"><div class="follow-icon" style="background:rgba(255,255,255,0.15)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="12" r="10" fill="#25D366"/><path d="M17.5 14.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.7-.3-1.4-.7-1.9-1.3-.5-.5-.9-1.1-1-1.8-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.3.2-.4 0-.2-.5-1.3-.7-1.8-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.5.5-.8 1.1-.8 1.8 0 1.1.7 2.2 1.5 3 .2.2 2 3.1 4.9 4.2.5.2.9.3 1.2.4.5.1 1 .1 1.3 0 .4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3z" fill="white"/></svg></div><span>For any issues, click here and send a message to our WhatsApp Helpline.</span></div>
+    <div class="follow-item" style="background:linear-gradient(135deg,#1c1917 0%,#7f0000 100%);border-color:transparent;color:white;cursor:pointer" onclick="window.open('https://youtu.be/G_6Rj75e5IA?si=rdb0PVwfDmxXpyiu','_blank')"><div class="follow-icon" style="background:rgba(255,255,255,0.15)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="12" r="10" fill="#FF0000"/><path d="M10 8l6 4-6 4V8z" fill="white"/></svg></div><span>Watch this video to learn how to top up.</span></div>
+    <div class="follow-item" style="background:linear-gradient(135deg,#1c1917 0%,#7f1d1d 100%);border-color:transparent;color:white;cursor:pointer" onclick="window.open('https://www.facebook.com/anilyari3','_blank')"><div class="follow-icon" style="background:rgba(255,255,255,0.15)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="12" r="10" fill="#1877F2"/><path d="M15.5 8h-2c-.6 0-1 .4-1 1v1.5h3l-.4 2.5H12.5V20h-2.5v-7H8v-2.5h2V9c0-2.2 1.3-3.5 3.5-3.5.7 0 2 .1 2 .1V8z" fill="white"/></svg></div><span>Click here to follow us on Facebook.</span></div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-grid">
+      <div>
+        <h3>Stay Connected</h3>
+        <p>If you want to top up by yourself, Click on YouTube and watch the video</p>
+        <div class="footer-social">
+          <a title="Facebook" href="https://www.facebook.com/anilyari3" target="_blank"><svg viewBox="0 0 24 24" width="13" height="13" fill="white"><path d="M15.5 8h-2c-.6 0-1 .4-1 1v1.5h3l-.4 2.5H12.5V20h-2.5v-7H8v-2.5h2V9c0-2.2 1.3-3.5 3.5-3.5.7 0 2 .1 2 .1V8z"/></svg></a>
+          <a title="WhatsApp" href="https://wa.me/9779746925872" target="_blank"><svg viewBox="0 0 24 24" width="13" height="13" fill="white"><path d="M17.5 14.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.7-.3-1.4-.7-1.9-1.3-.5-.5-.9-1.1-1-1.8-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.3.2-.4 0-.2-.5-1.3-.7-1.8-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.5.5-.8 1.1-.8 1.8 0 1.1.7 2.2 1.5 3 .2.2 2 3.1 4.9 4.2.5.2.9.3 1.2.4.5.1 1 .1 1.3 0 .4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3zM12 2a10 10 0 00-8.6 15L2 22l5.1-1.3A10 10 0 1012 2z"/></svg></a>
+          <a title="YouTube" href="https://youtu.be/G_6Rj75e5IA?si=rdb0PVwfDmxXpyiu" target="_blank"><svg viewBox="0 0 24 24" width="13" height="13" fill="white"><path d="M21.6 7.2a2.7 2.7 0 00-1.9-1.9C18 5 12 5 12 5s-6 0-7.7.3A2.7 2.7 0 002.4 7.2 28 28 0 002 12a28 28 0 00.4 4.8 2.7 2.7 0 001.9 1.9C6 19 12 19 12 19s6 0 7.7-.3a2.7 2.7 0 001.9-1.9A28 28 0 0022 12a28 28 0 00-.4-4.8z"/><path d="M10 15l5-3-5-3v6z" fill="#ff0000"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h3>Our Support Center</h3>
+        <div class="support-card" onclick="window.open('https://www.facebook.com/anilyari3','_blank')"><svg viewBox="0 0 24 24" width="18" height="18" fill="white" style="flex-shrink:0"><path d="M15.5 8h-2c-.6 0-1 .4-1 1v1.5h3l-.4 2.5H12.5V20h-2.5v-7H8v-2.5h2V9c0-2.2 1.3-3.5 3.5-3.5.7 0 2 .1 2 .1V8z"/></svg> Help Line [8AM-10PM] Facebook Helpline</div>
+        <div class="support-card"><svg viewBox="0 0 24 24" width="18" height="18" fill="white" style="flex-shrink:0"><path d="M17.5 14.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.7-.3-1.4-.7-1.9-1.3-.5-.5-.9-1.1-1-1.8 0-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.3.2-.4 0-.2-.5-1.3-.7-1.8-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.5.5-.8 1.1-.8 1.8 0 1.1.7 2.2 1.5 3 .2.2 2 3.1 4.9 4.2.5.2.9.3 1.2.4.5.1 1 .1 1.3 0 .4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.7 1.4 5.3L2 22l4.9-1.3C8.4 21.5 10.2 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg onclick="window.open('https://wa.me/9779746925872','_blank')"> Help Line [8AM-10PM] Whatsapp Helpline</div>
+        <div class="support-card"><svg viewBox="0 0 24 24" width="18" height="18" fill="white" style="flex-shrink:0"><path d="M12 2C6.5 2 2 6.1 2 11.2c0 3 1.5 5.7 3.9 7.4v3.6l3.4-1.9c.9.2 1.8.3 2.7.3 5.5 0 10-4.1 10-9.2S17.5 2 12 2zm1 12.4l-2.5-2.7-5 2.7 5.5-5.9 2.6 2.7 4.9-2.7-5.5 5.9z"/></svg onclick="window.open('https://www.facebook.com/anilyari3','_blank')"> Help Line [8AM-10PM] Messenger Helpline</div>
+      </div>
+    </div>
+    <div class="footer-copy">© Copyright 2026. All Rights Reserved. Developed by NexaTopUp</div>
+  </div>
+</div>
+
+<!-- ===== PAGE: PRODUCT DETAIL ===== -->
+<div class="page" id="page-product">
+  <div class="product-detail">
+
+    <!-- Product Header like x10topup -->
+    <div style="background:white;border-radius:14px;padding:1rem;display:flex;align-items:center;gap:1rem;margin-bottom:0.8rem;box-shadow:0 1px 6px rgba(0,0,0,0.07)">
+      <div id="detail-emoji" style="width:70px;height:70px;background:linear-gradient(135deg,var(--orange),#c2410c);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+      <div>
+        <div id="detail-title" style="font-weight:900;font-size:1.1rem;color:#1c1917"></div>
+        <div id="detail-subtitle" style="font-size:0.78rem;color:var(--muted);font-weight:700;margin-top:2px"></div>
+      </div>
+    </div>
+
+    <!-- Step 1: Select Recharge -->
+    <div style="background:white;border-radius:14px;padding:1rem;margin-bottom:0.8rem;box-shadow:0 1px 6px rgba(0,0,0,0.07)">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem">
+        <div style="width:30px;height:30px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:0.9rem;flex-shrink:0">1</div>
+        <span style="font-weight:900;font-size:1rem;color:#1c1917">Select Recharge</span>
+      </div>
+      <div id="packages-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem"></div>
+    </div>
+
+    <!-- Step 2: Account Info -->
+    <div style="background:white;border-radius:14px;padding:1rem;margin-bottom:0.8rem;box-shadow:0 1px 6px rgba(0,0,0,0.07)">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem">
+        <div style="width:30px;height:30px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:0.9rem;flex-shrink:0">2</div>
+        <span style="font-weight:900;font-size:1rem;color:#1c1917">Account Info</span>
+      </div>
+      <div class="form-group" style="margin-bottom:0.6rem">
+        <label style="font-weight:800;font-size:0.85rem;color:#1c1917;margin-bottom:0.4rem;display:block">Enter your Game UID</label>
+        <input type="text" placeholder="Enter your Game UID" id="player-id" style="width:100%;padding:0.75rem 1rem;border:1.5px solid #e7e5e4;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none">
+      </div>
+      <button style="width:100%;background:var(--orange);color:white;border:none;border-radius:10px;padding:0.75rem;font-weight:800;font-size:0.9rem;cursor:pointer;font-family:'Nunito',sans-serif" onclick="showToast('Game ID checking...')">Check your Game ID name</button>
+    </div>
+
+    <!-- Step 3: Quantity + Order -->
+    <div id="qty-section" style="background:white;border-radius:14px;padding:1rem;margin-bottom:0.8rem;box-shadow:0 1px 6px rgba(0,0,0,0.07)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem">
+        <span style="font-weight:900;font-size:1rem;color:#1c1917">Quantity</span>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <button onclick="changeQty(-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>
+          <span id="qty-display" style="font-weight:900;font-size:1.1rem;min-width:24px;text-align:center">1</span>
+          <button onclick="changeQty(1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total + Buy Now (always visible) -->
+    <div style="background:white;border-radius:14px;padding:1rem;margin-bottom:0.8rem;box-shadow:0 1px 6px rgba(0,0,0,0.07)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem;background:var(--bg);border-radius:8px;margin-bottom:0.8rem">
+        <span style="font-size:0.85rem;color:var(--muted);font-weight:700">Total Price</span>
+        <span id="total-price" style="font-family:'Bebas Neue',cursive;font-size:1.4rem;color:var(--orange)">Rs 0</span>
+      </div>
+      <button class="btn-order" id="btn-place-order" onclick="placeOrder()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:6px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6l1.6-8.4H6"/></svg>
+        Buy Now
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== PAGE: ADD FUND ===== -->
+<div class="page" id="page-addfund">
+  <div class="add-fund">
+    <h2 style="font-family:'Bebas Neue',cursive;font-size:1.6rem;margin-bottom:1rem">Add Funds</h2>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem">Select your preferred payment method</p>
+    <div class="payment-method-card" onclick="showManualPay()">
+      <div class="payment-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><path d="M3 22h18M3 10h18M5 10V22M19 10V22M12 10V22"/><path d="M2 10L12 3l10 7H2z" fill="rgba(255,255,255,0.2)" stroke="white"/></svg></div>
+      <div class="payment-info">
+        <strong>Manual Pay</strong>
+        <span>Proof Required</span>
+      </div>
+      <div class="payment-arrow">›</div>
+    </div>
+    <div class="verification-note"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:4px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Manual: 5-30 min verification</div>
+  </div>
+</div>
+
+<!-- ===== PAGE: MANUAL PAY ===== -->
+<div class="page" id="page-manualpay">
+  <div class="manual-pay">
+    <div style="background:#fef3c7;border-radius:8px;padding:0.7rem;font-size:0.78rem;margin-bottom:0.8rem;color:#92400e">
+      ⚠ Important: payment गर्दा remark मा हाल्नुहोस। गलत Remark मा Remark Code नभएमा Top-up हुँदैन र Refund पनि हुँदैन।
+    </div>
+    <div class="qr-box">
+      <div class="qr-placeholder"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="5" width="20" height="15" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 5l1.5-3h5L16 5"/><circle cx="18" cy="8" r="1" fill="white" stroke="none"/></svg></div>
+      <div class="pay-tabs">
+        <button class="pay-tab active" onclick="selectPayTab(this,'Khalti')">Khalti</button>
+        <button class="pay-tab" onclick="selectPayTab(this,'MyPay')">MyPay</button>
+      </div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem">Payment Remark</div>
+      <div class="remark-box">
+        <span class="remark-code" id="remark-code">RF43CF8EB</span>
+        <button class="btn-copy" onclick="copyRemark()">COPY</button>
+      </div>
+      <div class="form-group">
+        <label>Amount</label>
+        <input type="number" placeholder="0.00" id="pay-amount">
+      </div>
+      <div class="upload-box" onclick="showToast('Upload feature — connect Firebase Storage')">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Click to upload screenshot
+      </div>
+      <button class="btn-order" onclick="submitPayment()">SUBMIT PAYMENT</button>
+    </div>
+    <div class="deposit-history">
+      <h3>Deposit History</h3>
+      <table class="deposit-table">
+        <tr><th>Remark</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+        <tr><td style="color:var(--orange)">RF41B22D1</td><td>Rs 500.00</td><td><span class="approved-badge">APPROVED</span></td><td>29 May, 2026</td></tr>
+        <tr><td style="color:var(--orange)">RF408BA5E</td><td>Rs 1,000.00</td><td><span class="pending-badge">PENDING</span></td><td>29 May, 2026</td></tr>
+        <tr><td style="color:var(--orange)">RF4B2B6B8</td><td>Rs 2,000.00</td><td><span class="approved-badge">APPROVED</span></td><td>07 May, 2026</td></tr>
+        <tr><td style="color:var(--orange)">RF46CB1F6</td><td>Rs 550.00</td><td><span class="approved-badge">APPROVED</span></td><td>29 Mar, 2026</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: MY ORDERS ===== -->
+<div class="page" id="page-orders">
+  <div class="orders-page">
+    <h2 style="font-family:'Bebas Neue',cursive;font-size:1.6rem;margin-bottom:1rem">My Orders</h2>
+    <div class="order-card">
+      <div class="order-card-row"><span class="label">Order ID:</span><span class="value">3086</span></div>
+      <div class="order-card-row"><span class="label">Date:</span><span class="value">29-05-2026 04:21:12 PM</span></div>
+      <div class="order-card-row"><span class="label">Package:</span><span class="value">115 Diamond</span></div>
+      <div class="order-card-row"><span class="label">Quantity:</span><span class="value">1</span></div>
+      <div class="order-card-row"><span class="label">Player ID:</span><span class="value">7048739471</span></div>
+      <div class="order-card-row"><span class="label">Price:</span><span class="value">Rs99</span></div>
+      <div class="order-card-row"><span class="label">Status:</span><span style="color:var(--success);font-weight:800">completed</span></div>
+    </div>
+    <div class="order-card">
+      <div class="order-card-row"><span class="label">Order ID:</span><span class="value">3085</span></div>
+      <div class="order-card-row"><span class="label">Date:</span><span class="value">29-05-2026 04:20:25 PM</span></div>
+      <div class="order-card-row"><span class="label">Package:</span><span class="value">Weekly 🏆</span></div>
+      <div class="order-card-row"><span class="label">Quantity:</span><span class="value">2</span></div>
+      <div class="order-card-row"><span class="label">Player ID:</span><span class="value">7048739471</span></div>
+      <div class="order-card-row"><span class="label">Price:</span><span class="value">Rs400</span></div>
+      <div class="order-card-row"><span class="label">Status:</span><span style="color:var(--success);font-weight:800">completed</span></div>
+    </div>
+    <div id="no-orders-msg" style="display:none;text-align:center;padding:2rem;color:var(--muted)">No orders yet!</div>
+  </div>
+</div>
+
+<!-- ===== PAGE: MY CODES ===== -->
+<div class="page" id="page-codes">
+  <div class="codes-page">
+    <div class="codes-header">
+      <h2>My Codes</h2>
+      <button class="btn-redeem">Redeem Code</button>
+    </div>
+    <div style="background:white;border-radius:12px;padding:2rem;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+      <div class="no-codes">
+        <h3>No code found!</h3>
+        <button class="btn-order-now" onclick="showPage('home')">ORDER NOW</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: ACCOUNT ===== -->
+<div class="page" id="page-account">
+  <div class="account-page">
+    <div class="account-header">
+      <div class="account-avatar">A</div>
+      <div class="account-name">Hi, Anil Yari ✅</div>
+      <div class="account-balance">Available Balance : Rs1</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="val">Rs1</div><div class="lbl">Balance</div></div>
+      <div class="stat-card"><div class="val">9</div><div class="lbl">Total Order</div></div>
+      <div class="stat-card"><div class="val">Rs3049</div><div class="lbl">Total Spent</div></div>
+      <div class="stat-card"><div class="val">AC4659</div><div class="lbl">Support PIN</div></div>
+    </div>
+    <div class="info-section">
+      <h3>Account Information</h3>
+      <div class="info-row">
+        <span>Available Balance</span>
+        <div class="balance-box">Rs1</div>
+      </div>
+      <div class="info-row">
+        <span>Account Status</span>
+        <span class="verified-badge">✔ Account Verified!</span>
+      </div>
+    </div>
+    <div class="info-section">
+      <h3>User Information</h3>
+      <div class="info-row"><span>Email:</span><span>anilyari3@gmail.com</span></div>
+      <div class="info-row"><span>Phone:</span><span>—</span></div>
+    </div>
+    <button style="width:100%;background:#fee2e2;color:#dc2626;border:none;border-radius:10px;padding:0.8rem;font-weight:800;cursor:pointer;margin-top:0.5rem" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- ===== PAGE: LOGIN ===== -->
+<div class="page" id="page-login">
+  <div class="auth-page">
+    <div class="auth-card">
+      <h2>Login</h2>
+      <p>Login or register an account to continue</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="Email" id="login-email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="Password" id="login-pass">
+      </div>
+      <button class="btn-order" onclick="doLogin()">Login</button>
+      <div class="auth-divider">or sign in with credentials</div>
+      <button class="btn-google" onclick="doGoogleLogin()"><svg viewBox="0 0 24 24" width="18" height="18" style="margin-right:6px"><path d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9c-.3 1.4-1 2.6-2.1 3.5v2.8h3.4c2-1.8 3.3-4.5 3.3-8.1z" fill="white"/><path d="M12 23c3 0 5.5-1 7.3-2.7l-3.4-2.8c-1 .7-2.3 1.1-3.9 1.1-3 0-5.5-2-6.4-4.7H2v2.9C3.8 20.5 7.6 23 12 23z" fill="rgba(255,255,255,0.8)"/><path d="M5.6 13.9A6.9 6.9 0 015.3 12c0-.7.1-1.3.3-1.9V7.2H2A11 11 0 001 12c0 1.7.4 3.4 1 4.8l3.6-2.9z" fill="rgba(255,255,255,0.6)"/><path d="M12 5.4c1.7 0 3.2.6 4.4 1.7l3.3-3.3C17.5 1.9 15 1 12 1 7.6 1 3.8 3.5 2 7.2l3.6 2.9C6.5 7.4 9 5.4 12 5.4z" fill="rgba(255,255,255,0.9)"/></svg>Login with Google</button>
+      <a class="forgot" onclick="showPage('forgot')">Forget Password?</a>
+      <div class="auth-footer">New user to NexaTopUp? <a onclick="showPage('register')">Register Now</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: FORGOT PASSWORD ===== -->
+<div class="page" id="page-forgot">
+  <div class="auth-page">
+    <div class="auth-card">
+
+      <!-- Step 1: Enter Email -->
+      <div id="forgot-step1">
+        <div style="text-align:center;margin-bottom:1.2rem">
+          <div style="width:60px;height:60px;background:linear-gradient(135deg,#1c1917,#7f1d1d);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 0.8rem">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <h2 style="font-family:'Bebas Neue',cursive;font-size:1.8rem;margin:0">FORGOT PASSWORD?</h2>
+          <p style="color:var(--muted);font-size:0.85rem;margin:0.3rem 0 0">Timilro registered email haluhos</p>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="example@gmail.com" id="forgot-email">
+        </div>
+        <button class="btn-order" onclick="doForgotStep1()" id="forgot-btn1">
+          Proceed
+        </button>
+        <div style="text-align:center;margin-top:1rem">
+          <a onclick="showPage('login')" style="color:var(--orange);font-weight:700;font-size:0.85rem;cursor:pointer">← Back to Login</a>
+        </div>
+      </div>
+
+      <!-- Step 2: Email Sent Success -->
+      <div id="forgot-step2" style="display:none">
+        <div style="text-align:center;margin-bottom:1.5rem">
+          <div style="width:70px;height:70px;background:linear-gradient(135deg,#14532d,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="white" stroke-width="2"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+          </div>
+          <h2 style="font-family:'Bebas Neue',cursive;font-size:1.8rem;margin:0;color:#16a34a">EMAIL PATHAIYOU!</h2>
+          <p style="color:var(--muted);font-size:0.85rem;margin:0.5rem 0 0">Password reset link timilro email maa pathaiyo</p>
+        </div>
+        <div style="background:var(--bg);border-radius:12px;padding:1rem;margin-bottom:1.2rem;border:1.5px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.4rem">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span style="font-weight:800;font-size:0.85rem">Yo email maa link gayo:</span>
+          </div>
+          <span id="forgot-sent-email" style="color:var(--orange);font-weight:700;font-size:0.9rem;word-break:break-all"></span>
+        </div>
+        <div style="background:#fef9c3;border-radius:12px;padding:0.8rem;margin-bottom:1.2rem;border:1.5px solid #fde047">
+          <p style="margin:0;font-size:0.82rem;font-weight:700;color:#854d0e">⚠️ Email nadekheko bhane Spam/Junk folder check gara!</p>
+        </div>
+        <a href="https://mail.google.com" target="_blank">
+          <button class="btn-order" style="background:linear-gradient(135deg,#1c1917,#7f1d1d)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" style="vertical-align:middle;margin-right:6px"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z" fill="#EA4335"/><path d="M20 4l-8 8-8-8" stroke="white" stroke-width="1.5" fill="none"/></svg>
+            Gmail Khulaunu
+          </button>
+        </a>
+        <div style="text-align:center;margin-top:0.8rem">
+          <a onclick="doResendEmail()" style="color:var(--orange);font-weight:700;font-size:0.82rem;cursor:pointer">Email aayena? Pheri pathau</a>
+        </div>
+        <div style="text-align:center;margin-top:0.5rem">
+          <a onclick="showPage('login')" style="color:var(--muted);font-weight:700;font-size:0.82rem;cursor:pointer">← Login page maa jaanu</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: REGISTER ===== -->
+<div class="page" id="page-register">
+  <div class="auth-page">
+    <div class="auth-card">
+      <h2>Register</h2>
+      <p>Enter your information to create an account</p>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" placeholder="Name" id="reg-name">
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" placeholder="Phone" id="reg-phone">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="Email" id="reg-email">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="Password" id="reg-pass">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" placeholder="Confirm Password" id="reg-pass2">
+        </div>
+      </div>
+      <button class="btn-order" id="reg-submit-btn" onclick="doRegister()">Register</button>
+      <div class="auth-divider">or sign up with credentials</div>
+      <button class="btn-google" onclick="doGoogleLogin()"><svg viewBox="0 0 24 24" width="18" height="18" style="margin-right:6px"><path d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9c-.3 1.4-1 2.6-2.1 3.5v2.8h3.4c2-1.8 3.3-4.5 3.3-8.1z" fill="white"/><path d="M12 23c3 0 5.5-1 7.3-2.7l-3.4-2.8c-1 .7-2.3 1.1-3.9 1.1-3 0-5.5-2-6.4-4.7H2v2.9C3.8 20.5 7.6 23 12 23z" fill="rgba(255,255,255,0.8)"/><path d="M5.6 13.9A6.9 6.9 0 015.3 12c0-.7.1-1.3.3-1.9V7.2H2A11 11 0 001 12c0 1.7.4 3.4 1 4.8l3.6-2.9z" fill="rgba(255,255,255,0.6)"/><path d="M12 5.4c1.7 0 3.2.6 4.4 1.7l3.3-3.3C17.5 1.9 15 1 12 1 7.6 1 3.8 3.5 2 7.2l3.6 2.9C6.5 7.4 9 5.4 12 5.4z" fill="rgba(255,255,255,0.9)"/></svg>Sign up with Google</button>
+      <div class="auth-footer">Already have an account? <a onclick="showPage('login')">Login</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: CONTACT ===== -->
+<div class="page" id="page-contact">
+  <div class="contact-page">
+    <h2 style="font-family:'Bebas Neue',cursive;font-size:1.8rem;text-align:center;margin-bottom:1rem">Contact Us</h2>
+    <div class="follow-item" style="background:linear-gradient(135deg,#1c1917 0%,#064e1e 100%);border-color:transparent;color:white;cursor:pointer" onclick="window.open('https://wa.me/9779746925872','_blank')"><div class="follow-icon" style="background:rgba(255,255,255,0.15)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="12" r="10" fill="#25D366"/><path d="M17.5 14.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.7-.3-1.4-.7-1.9-1.3-.5-.5-.9-1.1-1-1.8-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.3.2-.4 0-.2-.5-1.3-.7-1.8-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.5.5-.8 1.1-.8 1.8 0 1.1.7 2.2 1.5 3 .2.2 2 3.1 4.9 4.2.5.2.9.3 1.2.4.5.1 1 .1 1.3 0 .4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.2-.4-.3z" fill="white"/></svg></div><span>For any issues, click here and send a message to our WhatsApp Helpline.</span></div>
+    <div class="follow-item" style="background:linear-gradient(135deg,#1c1917 0%,#7f0000 100%);border-color:transparent;color:white;cursor:pointer" onclick="window.open('https://youtu.be/G_6Rj75e5IA?si=rdb0PVwfDmxXpyiu','_blank')"><div class="follow-icon" style="background:rgba(255,255,255,0.15)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="12" r="10" fill="#FF0000"/><path d="M10 8l6 4-6 4V8z" fill="white"/></svg></div><span>Watch this video to learn how to top up.</span></div>
+    <div class="follow-item" style="background:linear-gradient(135deg,#1c1917 0%,#7f1d1d 100%);border-color:transparent;color:white;cursor:pointer" onclick="window.open('https://www.facebook.com/anilyari3','_blank')"><div class="follow-icon" style="background:rgba(255,255,255,0.15)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="12" r="10" fill="#1877F2"/><path d="M15.5 8h-2c-.6 0-1 .4-1 1v1.5h3l-.4 2.5H12.5V20h-2.5v-7H8v-2.5h2V9c0-2.2 1.3-3.5 3.5-3.5.7 0 2 .1 2 .1V8z" fill="white"/></svg></div><span>Click here to follow us on Facebook.</span></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (logged out) -->
+<nav class="bottom-nav" id="bottom-nav-out">
+  <button class="bottom-nav-item active" onclick="showPage('home',this)">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Home
+  </button>
+  <button class="bottom-nav-item" onclick="window.open('https://youtu.be/G_6Rj75e5IA?si=rdb0PVwfDmxXpyiu','_blank')">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.0 1.18C0 .98.43.02 2.07.02h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></span>Tutorial
+  </button>
+  <button class="bottom-nav-item" onclick="showPage('home',this)">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>Topup
+  </button>
+  <button class="bottom-nav-item" onclick="showPage('contact',this)">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>Contact Us
+  </button>
+</nav>
+
+<!-- BOTTOM NAV (logged in) -->
+<nav class="bottom-nav" id="bottom-nav-in" style="display:none">
+  <button class="bottom-nav-item active" onclick="showPage('home',this,'in')">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Home
+  </button>
+  <button class="bottom-nav-item" onclick="showPage('addfund',this,'in')">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>Add Fund
+  </button>
+  <button class="bottom-nav-item" onclick="showPage('orders',this,'in')">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></span>My Orders
+  </button>
+  <button class="bottom-nav-item" onclick="showPage('codes',this,'in')">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg></span>My Codes
+  </button>
+  <button class="bottom-nav-item" onclick="showPage('account',this,'in')">
+    <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Account
+  </button>
+</nav>
+
+<script>
+
+  // ORDER ROTATION DATA
+  const allOrderSets = [
+    [
+      {color:'#e11d48', initial:'S', name:'Samrat Bk', item:'Level Up - Level 6', price:'60 Rs', status:'Processing', statusClass:'status-processing', time:'1 day ago'},
+      {color:'#e11d48', initial:'S', name:'Samrat Bk', item:'1240 Diamond', price:'990 Rs', status:'Processing', statusClass:'status-processing', time:'1 day ago'},
+      {color:'#7c3aed', initial:'B', name:'Bishwas Pariyar', item:'Weekly 🏆', price:'200 Rs', status:'Completed', statusClass:'status-completed', time:'1 day ago'},
+      {color:'#0891b2', initial:'R', name:'Rohan Thapa', item:'100 Diamond', price:'85 Rs', status:'Completed', statusClass:'status-completed', time:'2 days ago'},
+      {color:'#16a34a', initial:'P', name:'Prakash Oli', item:'Weekly Lite', price:'70 Rs', status:'Completed', statusClass:'status-completed', time:'2 days ago'},
+      {color:'#f97316', initial:'A', name:'Anil Magar', item:'520 Diamond', price:'410 Rs', status:'Processing', statusClass:'status-processing', time:'3 days ago'}
+    ],
+    [
+      {color:'#be185d', initial:'N', name:'Nisha Rai', item:'Evo Access', price:'200 Rs', status:'Completed', statusClass:'status-completed', time:'3 days ago'},
+      {color:'#1d4ed8', initial:'D', name:'Dipesh KC', item:'210 Diamond', price:'170 Rs', status:'Completed', statusClass:'status-completed', time:'3 days ago'},
+      {color:'#b45309', initial:'K', name:'Krishna Tamang', item:'Level Up - Level 12', price:'120 Rs', status:'Processing', statusClass:'status-processing', time:'4 days ago'},
+      {color:'#7c3aed', initial:'S', name:'Sujata Shrestha', item:'Weekly 🏆', price:'200 Rs', status:'Completed', statusClass:'status-completed', time:'4 days ago'},
+      {color:'#0f766e', initial:'M', name:'Milan Gurung', item:'520 Diamond', price:'410 Rs', status:'Completed', statusClass:'status-completed', time:'4 days ago'},
+      {color:'#dc2626', initial:'R', name:'Rajan Thapa', item:'1040 Diamond', price:'810 Rs', status:'Processing', statusClass:'status-processing', time:'5 days ago'}
+    ],
+    [
+      {color:'#0891b2', initial:'A', name:'Anita Lama', item:'100 Diamond', price:'85 Rs', status:'Completed', statusClass:'status-completed', time:'5 days ago'},
+      {color:'#16a34a', initial:'B', name:'Bikash Poudel', item:'UniPin 50 UP', price:'55 Rs', status:'Completed', statusClass:'status-completed', time:'5 days ago'},
+      {color:'#e11d48', initial:'S', name:'Suman Karki', item:'2180 Diamond', price:'1700 Rs', status:'Processing', statusClass:'status-processing', time:'6 days ago'},
+      {color:'#7c3aed', initial:'P', name:'Priya Magar', item:'Airdrop Package', price:'150 Rs', status:'Completed', statusClass:'status-completed', time:'6 days ago'},
+      {color:'#f97316', initial:'H', name:'Hari Bahadur', item:'Weekly Lite', price:'70 Rs', status:'Completed', statusClass:'status-completed', time:'6 days ago'},
+      {color:'#1d4ed8', initial:'R', name:'Rohit Adhikari', item:'Level Up - Level 6', price:'60 Rs', status:'Completed', statusClass:'status-completed', time:'7 days ago'}
+    ]
+  ];
+
+  let currentOrderSet = 0;
+
+  function renderOrders(setIndex) {
+    const preview = document.getElementById('ordersPreview');
+    if (!preview) return;
+    const orders = allOrderSets[setIndex];
+    preview.innerHTML = orders.map(o => `
+      <div class="order-item">
+        <div class="order-avatar" style="background:${o.color}">${o.initial}</div>
+        <div class="order-info"><strong>${o.name}</strong><span>${o.item} - ${o.price}</span></div>
+        <div><span class="status-badge ${o.statusClass}">${o.status}</span><br><small style="color:var(--muted);font-size:0.65rem">${o.time}</small></div>
+      </div>`).join('');
+  }
+
+  function rotateOrders() {
+    const wrap = document.getElementById('ordersWrap');
+    if (!wrap) return;
+    wrap.style.opacity = '0';
+    setTimeout(() => {
+      currentOrderSet = (currentOrderSet + 1) % allOrderSets.length;
+      renderOrders(currentOrderSet);
+      wrap.style.opacity = '1';
+    }, 500);
+  }
+
+  renderOrders(0);
+  setInterval(rotateOrders, 5000);
+
+  // IMAGE SLIDER
+  let sliderIndex = 0;
+  const totalSlides = 3;
+  function goToSlide(n) {
+    sliderIndex = n;
+    document.getElementById('sliderTrack').style.transform = 'translateX(-' + (n * 33.333) + '%)';
+    document.querySelectorAll('.slider-dot').forEach((d,i) => d.classList.toggle('active', i===n));
+  }
+  setInterval(() => { goToSlide((sliderIndex + 1) % totalSlides); }, 2000);
+  if (typeof window.isLoggedIn === 'undefined') window.isLoggedIn = false;
+  let currentProduct = null;
+  let selectedPackage = null;
+
+  const products = {
+    ff: { name: 'FREE FIRE DIAMONDS', subtitle: 'FF TOPUP', emoji: '<svg viewBox="0 0 24 24" width="52" height="52" fill="none"><path d="M12 3L2 9l10 12L22 9z" fill="rgba(255,255,255,0.95)" stroke="rgba(200,240,255,0.5)" stroke-width="0.5"/><path d="M2 9h20M12 3L7 9l5 12 5-12z" stroke="rgba(150,220,255,0.5)" stroke-width="0.8"/></svg>', packages: [
+      {qty:'25', label:'Diamond', price:30},
+      {qty:'50', label:'Diamond', price:60},
+      {qty:'115', label:'Diamond', price:99},
+      {qty:'240', label:'Diamond', price:198},
+      {qty:'355', label:'Diamond', price:297},
+      {qty:'480', label:'Diamond', price:396},
+      {qty:'610', label:'Diamond', price:495},
+      {qty:'725', label:'Diamond', price:594},
+      {qty:'840', label:'Diamond', price:693},
+      {qty:'965', label:'Diamond', price:792},
+      {qty:'1090', label:'Diamond', price:891},
+      {qty:'1240', label:'Diamond', price:990},
+      {qty:'2530', label:'Diamond', price:1980},
+      {qty:'5060', label:'Diamond', price:3960},
+      {qty:'Weekly 🎫', label:'Membership', price:200},
+      {qty:'Monthly 🎫', label:'Membership', price:1000}
+    ]},
+    weekly: { name: 'WEEKLY OFFER', subtitle: 'FF TOPUP', emoji: '<svg viewBox="0 0 24 24" width="52" height="52" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" fill="rgba(255,255,255,0.9)"/><circle cx="6" cy="12" r="2" fill="#f97316"/><path d="M10 9h8M10 12h6M10 15h4" stroke="#999" stroke-width="1" stroke-linecap="round"/></svg>', packages: [
+      {qty:'Weekly 🎫', label:'Membership', price:200}
+    ]},
+    'weekly-lite': { name: 'WEEKLY LITE', subtitle: 'FF TOPUP', emoji: '<svg viewBox="0 0 24 24" width="52" height="52" fill="none"><rect x="3" y="8" width="18" height="13" rx="2" fill="rgba(255,255,255,0.9)"/><path d="M3 11h18" stroke="#f97316" stroke-width="1.5"/><path d="M9 8V5h6v3" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.7)" stroke-width="1"/></svg>', packages: [
+      {qty:'Weekly Lite', label:'Offer', price:70}
+    ]},
+    levelup: { name: 'LEVEL UP PASS', subtitle: 'FF TOPUP', emoji: '<svg viewBox="0 0 24 24" width="52" height="52" fill="none"><path d="M12 4l-7 9h4v7h6v-7h4z" fill="rgba(255,255,255,0.95)"/></svg>', packages: [
+      {qty:'Level Up Pass', label:'', price:550},
+      {qty:'Level Up - Level 6', label:'', price:60},
+      {qty:'Level Up - Level 10', label:'', price:95},
+      {qty:'Level Up - Level 15', label:'', price:95},
+      {qty:'Level Up - Level 20', label:'', price:95},
+      {qty:'Level Up - Level 25', label:'', price:95},
+      {qty:'Level Up - Level 30', label:'', price:140}
+    ]},
+    evo: { name: 'EVO ACCESS', subtitle: 'FF TOPUP', emoji: '<svg viewBox="0 0 24 24" width="52" height="52" fill="none"><path d="M12 3L22 20H2z" fill="rgba(255,255,255,0.95)"/><path d="M12 8L17.5 18H6.5z" fill="#f97316" opacity="0.5"/></svg>', packages: [
+      {qty:'Evo Access 3 Day', label:'', price:90},
+      {qty:'Evo Access 7 Day', label:'', price:150},
+      {qty:'Evo Access 30 Day', label:'', price:399}
+    ]},
+    airdrop: { name: 'ID CODE AIRDROP', subtitle: 'FF TOPUP', emoji: '<svg viewBox="0 0 24 24" width="52" height="52" fill="none"><circle cx="12" cy="10" r="6" stroke="rgba(255,255,255,0.9)" stroke-width="1.5" fill="none"/><circle cx="12" cy="10" r="3" fill="rgba(255,255,255,0.8)"/><path d="M12 16v5M9 21h6" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>', packages: [
+      {qty:'0$ - 0.99$', label:'Airdrop', price:185},
+      {qty:'1$ - 1.99$', label:'Airdrop', price:355},
+      {qty:'2$ - 2.99$', label:'Airdrop', price:500},
+      {qty:'3$ - 3.99$', label:'Airdrop', price:655}
+    ]},
+    unipin: { name: 'UNIPIN VOUCHER', subtitle: 'FF TOPUP', emoji: '<svg viewBox="0 0 24 24" width="52" height="52" fill="none"><path d="M12 2L4 6v6c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V6z" fill="rgba(255,255,255,0.9)"/><path d="M9 12l2 2 4-4" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>', packages: [
+      {qty:'2000 UP', label:'UniPin', price:2250, soldOut:true}
+    ]}
+  };
+
+  function showPage(page, btn, navType) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    // Always clear active from BOTH navs, then set on correct one
+    document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+    if (btn) {
+      btn.classList.add('active');
+    } else {
+      // Called without btn (e.g. after login) — highlight Home on visible nav
+      const visibleNav = window.isLoggedIn ? 'bottom-nav-in' : 'bottom-nav-out';
+      const first = document.querySelector('#' + visibleNav + ' .bottom-nav-item');
+      if (first) first.classList.add('active');
+    }
+    window.scrollTo(0, 0);
+  }
+
+  const qtyAllowed = ['weekly', 'weekly-lite', 'unipin'];
+
+  function showProductDetail(key) {
+    currentProduct = key;
+    selectedPackage = null;
+    currentQty = 1;
+    document.getElementById('qty-display').textContent = 1;
+    // Show or hide quantity section
+    const qtySection = document.getElementById('qty-section');
+    qtySection.style.display = qtyAllowed.includes(key) ? 'block' : 'none';
+    const p = products[key];
+    document.getElementById('detail-title').textContent = p.name;
+    document.getElementById('detail-subtitle').textContent = p.subtitle || 'FF TOPUP';
+    document.getElementById('detail-emoji').innerHTML = p.emoji;
+
+    // Show Login or Buy Now button based on login status
+    const btn = document.getElementById('btn-place-order');
+    if (!window.isLoggedIn) {
+      btn.textContent = 'LOG IN';
+      btn.onclick = () => { showPage('login'); };
+    } else {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:6px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6l1.6-8.4H6"/></svg> Buy Now';
+      btn.onclick = placeOrder;
+    }
+
+    const grid = document.getElementById('packages-grid');
+    grid.innerHTML = '';
+    p.packages.forEach((pkg, i) => {
+      const div = document.createElement('div');
+      const isSoldOut = pkg.soldOut;
+      div.className = 'package-card' + (i === 0 && !isSoldOut ? ' selected' : '') + (isSoldOut ? ' sold-out' : '');
+      div.innerHTML = `
+        <div class="pkg-radio"></div>
+        <div class="pkg-info">
+          <div class="qty">${pkg.qty}${pkg.label ? '' : ''}</div>
+          ${pkg.label ? `<div class="label">${pkg.label}</div>` : ''}
+          ${isSoldOut ? '<span class="soldout-badge">STOCK OUT</span>' : ''}
+        </div>
+        <div class="price">Rs ${pkg.price}</div>`;
+      if (!isSoldOut) {
+        div.onclick = () => {
+          document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+          div.classList.add('selected');
+          selectedPackage = pkg;
+          updateTotal();
+        };
+        if (i === 0) { selectedPackage = pkg; }
+      }
+      grid.appendChild(div);
+    });
+    // select first non-soldout
+    if (!selectedPackage) {
+      const first = p.packages.find(pkg => !pkg.soldOut);
+      if (first) { selectedPackage = first; }
+    }
+    updateTotal();
+    showPage('product');
+  }
+
+  function updateTotal() {
+    if (!selectedPackage) return;
+    document.getElementById('total-price').textContent = 'Rs ' + (selectedPackage.price * currentQty);
+  }
+
+  let currentQty = 1;
+  function changeQty(delta) {
+    currentQty = Math.max(1, Math.min(10, currentQty + delta));
+    document.getElementById('qty-display').textContent = currentQty;
+    updateTotal();
+  }
+
+  function placeOrder() {
+    const pid = document.getElementById('player-id').value.trim();
+    if (!pid) { showToast('Player ID haluhos!'); return; }
+    if (!selectedPackage) { showToast('Package choose garuhos!'); return; }
+    showToast('✅ Order placed successfully!');
+    setTimeout(() => showPage('orders'), 1000);
+  }
+
+  function showManualPay() { showPage('manualpay'); }
+
+  function selectPayTab(btn, method) {
+    document.querySelectorAll('.pay-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function copyRemark() {
+    const code = document.getElementById('remark-code').textContent;
+    navigator.clipboard.writeText(code).catch(() => {});
+    showToast('Remark code copied: ' + code);
+  }
+
+  function submitPayment() {
+    const amt = document.getElementById('pay-amount').value;
+    if (!amt || amt <= 0) { showToast('Amount haluhos!'); return; }
+    showToast('✅ Payment submitted! Verification pending...');
+  }
+
+
+  // INSTALL POPUP
+  function showInstallPopup() {
+    document.getElementById('installModal').style.display = 'flex';
+  }
+
+  function closeInstallPopup() {
+    document.getElementById('installModal').style.display = 'none';
+  }
+
+  function doInstallApp() {
+    closeInstallPopup();
+    showToast('✅ Menu > "Add to Home Screen" click garnus!');
+  }
+
+  document.getElementById('installModal').addEventListener('click', function(e) {
+    if (e.target === this) closeInstallPopup();
+  });
+
+  function toggleHelpPopup() {
+    const popup = document.getElementById('helpPopup');
+    const isVisible = popup.style.display === 'flex';
+    popup.style.display = isVisible ? 'none' : 'flex';
+  }
+
+  // Close popup when clicking outside
+  document.addEventListener('click', function(e) {
+    const float = document.querySelector('.help-float');
+    if (float && !float.contains(e.target)) {
+      const popup = document.getElementById('helpPopup');
+      if (popup) popup.style.display = 'none';
+    }
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
